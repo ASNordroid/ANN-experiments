@@ -1,5 +1,33 @@
 import numpy as np
 
+# Learning patterns
+A = np.array([-1, 1, 1, 1,-1,
+               1,-1,-1,-1, 1,
+               1, 1, 1, 1, 1,
+               1,-1,-1,-1, 1,
+               1,-1,-1,-1, 1])
+B = np.array([1, 1, 1, 1, 1,
+              1,-1,-1,-1, 1,
+              1, 1, 1, 1, 1,
+              1,-1,-1,-1, 1,
+              1, 1, 1, 1, 1])
+C = np.array([1, 1, 1, 1, 1,
+              1,-1,-1,-1,-1,
+              1,-1,-1,-1,-1,
+              1,-1,-1,-1,-1,
+              1, 1, 1, 1, 1])
+
+
+# Print pattern in easy readable form
+def print_pattern(pattern):
+    for i in range(0, len(pattern), 5):
+        for j in range(i, i+5):
+            if pattern[j] == 1:
+                print("X", end="")
+            else:
+                print("_", end="")
+        print()
+
 
 def sign(i):
     if i >= 0:
@@ -7,28 +35,33 @@ def sign(i):
     else:
         return -1
 
-v_sign = np.vectorize(sign)
+
+def train(pts):
+    r, c = pts.shape
+    W = np.zeros((c, c))
+
+    for p in pts:
+        W = W + np.outer(p, p) # Weight matrix
+    np.fill_diagonal(W, 0)
+
+    return W / r
 
 
-def recognize(y1):
-    y1 = np.dot(W, y1)
-    y1 = v_sign(y1)
-    return y1
+def remember(W, pts, steps=5):
+    for _ in range(steps):
+        pts = np.vectorize(sign)(np.dot(pts, W))
+    
+    return pts
 
-# Training patterns
-pattern_1 = np.array([[-1, 1, -1, 1, 1]])
-pattern_2 = np.array([[1, -1, 1, 1, -1]])
-pattern_3 = np.array([[-1, 1, -1, -1, 1]])
-patterns = [pattern_1, pattern_2, pattern_3]
+
+patterns = np.array([A, B, C])
 
 # To recognize
-y = np.array([[-1, 1, -1, -1, 1]])
+y = np.array([-1, 1, 1, 1,-1,
+               1,-1, 1, 1,-1,
+               1,-1,-1,-1, 1,
+               1,-1, 1,-1, 1,
+               1,-1,-1,-1, 1])
 
-# Weight matrix)
-c_1 = np.dot(pattern_1.T, pattern_1)
-c_2 = np.dot(pattern_2.T, pattern_2)
-c_3 = np.dot(pattern_3.T, pattern_3)
-W = c_1 + c_2 + c_3
-np.fill_diagonal(W, 0)
-
-print(recognize(y.transpose()))
+print_pattern(y)
+print_pattern(remember(train(patterns), y))
